@@ -4,15 +4,19 @@ import axios from "axios";
 import redisClient from "../config/redis.config";
 import getRandomInt from "../utils/randomNumber";
 import StatusCode from "status-code-enum";
+import { createToken } from "../utils/jwt";
+import User from "../model/user.model";
+
+const user = new User();
 
 class AuthController implements authControllerInterface {
   async getCode(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;
 
-      const existedCode = await redisClient.get(email);
-      console.log({ existedCode });
-      if (existedCode)
+      const savedCode = await redisClient.get(email);
+      console.log({ savedCode });
+      if (savedCode)
         throw {
           message: "your code is mount yet",
           statusCode: StatusCode.ClientErrorBadRequest,
@@ -28,16 +32,50 @@ class AuthController implements authControllerInterface {
         })
         .then(() => redisClient.set(email, code))
         .then(() => redisClient.expire(email, 60 * 2))
-        .then(() => res.send("code is sent to your email"))
+        .then(() => res.status(201))
         .catch(() => res.send("has error"));
     } catch (error) {
       next(error);
     }
   }
 
-  login(req: Request, res: Response, next: NextFunction) {
+  async login(req: Request, res: Response, next: NextFunction) {
     try {
-      res.send("this is login");
+      const { code, email } = req.body;
+
+      const savedCode = await redisClient.get(email);
+
+      if (!savedCode)
+        throw {
+          message: "your code expired or not exist for ant reason",
+          statusCode: StatusCode.ClientErrorBadRequest,
+        };
+
+      if (code !== savedCode)
+        throw {
+          message: "code is wrong",
+          statusCode: StatusCode.ClientErrorBadRequest,
+        };
+
+      await redisClient.del(email);
+
+      const userToken = await createToken(email);
+      const userRefreshToken = await createToken(email, true);
+
+      await user.update(
+        { email },
+        { token: userToken, refreshToken: userRefreshToken }
+      );
+
+      res.status(200).send({
+        success: true,
+        statusCode: 200,
+        data: {
+          message: "login successfully",
+          token: userToken,
+          refreshToken: userRefreshToken,
+        },
+      });
     } catch (error) {
       next(error);
     }

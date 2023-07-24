@@ -78,7 +78,9 @@ class User implements userModelInterface {
         statusCode: StatusCode.ClientErrorNotFound,
       };
 
-    const updateRes = await userModel.updateOne(findBy, { $set: data });
+    const updateRes = await userModel.updateOne(findBy, {
+      $set: { ...user, ...data },
+    });
 
     if (!updateRes.modifiedCount) {
       throw {
