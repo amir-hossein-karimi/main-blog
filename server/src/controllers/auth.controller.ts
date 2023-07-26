@@ -101,6 +101,24 @@ class AuthController implements authControllerInterface {
       next(error);
     }
   }
+
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.params;
+
+      await redisClient.del(email);
+
+      res.status(200).send({
+        success: true,
+        statusCode: 200,
+        data: {
+          message: "logout successfully",
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default AuthController;
