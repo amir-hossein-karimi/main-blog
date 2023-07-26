@@ -15,7 +15,6 @@ class AuthController implements authControllerInterface {
       const { email } = req.body;
 
       const savedCode = await redisClient.get(email);
-      console.log({ savedCode });
       if (savedCode)
         throw {
           message: "your code is mount yet",
@@ -30,9 +29,15 @@ class AuthController implements authControllerInterface {
           subject: "verification code",
           text: `this is your login code ===> ${code}`,
         })
-        .then(() => redisClient.set(email, code))
-        .then(() => redisClient.expire(email, 60 * 2))
-        .then(() => res.status(201))
+        .then(() => {
+          return redisClient.set(email, code);
+        })
+        .then(() => {
+          return redisClient.expire(email, 60 * 2);
+        })
+        .then(() => {
+          res.status(201).end();
+        })
         .catch(() => res.send("has error"));
     } catch (error) {
       next(error);
@@ -59,13 +64,14 @@ class AuthController implements authControllerInterface {
 
       await redisClient.del(email);
 
-      const userToken = await createToken(email);
-      const userRefreshToken = await createToken(email, true);
+      const userToken = await createToken({ email });
+      const userRefreshToken = await createToken({ email }, true);
 
-      await user.update(
-        { email },
-        { token: userToken, refreshToken: userRefreshToken }
-      );
+      // save tokens on redis
+      // await user.update(
+      //   { email },
+      //   { token: userToken, refreshToken: userRefreshToken }
+      // );
 
       res.status(200).send({
         success: true,
@@ -77,6 +83,7 @@ class AuthController implements authControllerInterface {
         },
       });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }

@@ -3,7 +3,7 @@ import { sign, verify, JwtPayload } from "jsonwebtoken";
 import { SECRET } from "../constants";
 
 const createToken = async (
-  payload: string,
+  payload: object,
   isRefreshToken: boolean = false
 ): Promise<string> => {
   const token = await sign(payload, SECRET, {
