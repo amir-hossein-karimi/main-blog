@@ -5,16 +5,13 @@ import redisClient from "../config/redis.config";
 import getRandomInt from "../utils/randomNumber";
 import StatusCode from "status-code-enum";
 import { createToken } from "../utils/jwt";
-import User from "../model/user.model";
-
-const user = new User();
 
 class AuthController implements authControllerInterface {
   async getCode(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;
 
-      const savedCode = await redisClient.get(email);
+      const savedCode = await redisClient.get(`${email}:otp`);
       if (savedCode)
         throw {
           message: "your code is mount yet",
@@ -30,10 +27,10 @@ class AuthController implements authControllerInterface {
           text: `this is your login code ===> ${code}`,
         })
         .then(() => {
-          return redisClient.set(email, code);
+          return redisClient.set(`${email}:otp`, code);
         })
         .then(() => {
-          return redisClient.expire(email, 60 * 2);
+          return redisClient.expire(`${email}:otp`, 60 * 2);
         })
         .then(() => {
           res.status(201).end();
@@ -48,7 +45,7 @@ class AuthController implements authControllerInterface {
     try {
       const { code, email } = req.body;
 
-      const savedCode = await redisClient.get(email);
+      const savedCode = await redisClient.get(`${email}:otp`);
 
       if (!savedCode)
         throw {
@@ -62,16 +59,17 @@ class AuthController implements authControllerInterface {
           statusCode: StatusCode.ClientErrorBadRequest,
         };
 
-      await redisClient.del(email);
+      await redisClient.del(`${email}:otp`);
 
       const userToken = await createToken({ email });
       const userRefreshToken = await createToken({ email }, true);
 
-      // save tokens on redis
-      // await user.update(
-      //   { email },
-      //   { token: userToken, refreshToken: userRefreshToken }
-      // );
+      const userRedis = JSON.stringify({
+        token: userToken,
+        refreshToken: userRefreshToken,
+      });
+
+      await redisClient.set(email, userRedis);
 
       res.status(200).send({
         success: true,
