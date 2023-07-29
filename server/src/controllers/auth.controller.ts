@@ -5,6 +5,7 @@ import redisClient from "../config/redis.config";
 import getRandomInt from "../utils/randomNumber";
 import StatusCode from "status-code-enum";
 import { createToken } from "../utils/jwt";
+import redisObject from "../utils/redisObject";
 
 class AuthController implements authControllerInterface {
   async getCode(req: Request, res: Response, next: NextFunction) {
@@ -26,15 +27,9 @@ class AuthController implements authControllerInterface {
           subject: "verification code",
           text: `this is your login code ===> ${code}`,
         })
-        .then(() => {
-          return redisClient.set(`${email}:otp`, code);
-        })
-        .then(() => {
-          return redisClient.expire(`${email}:otp`, 60 * 2);
-        })
-        .then(() => {
-          res.status(201).end();
-        })
+        .then(() => redisClient.set(`${email}:otp`, code))
+        .then(() => redisClient.expire(`${email}:otp`, 60 * 2))
+        .then(() => res.status(201).end())
         .catch(() => res.send("has error"));
     } catch (error) {
       next(error);
