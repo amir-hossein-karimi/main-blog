@@ -1,3 +1,4 @@
+import StatusCode from "status-code-enum";
 import redisClient from "../config/redis.config";
 
 const redisObject = {
@@ -7,7 +8,10 @@ const redisObject = {
       return data;
     } catch (e) {
       console.log("get all redis object error", e);
-      return "error";
+      throw {
+        statusCode: StatusCode.ServerErrorInternal,
+        message: "internal server error",
+      };
     }
   },
   async set(key: string, obj: object) {
@@ -18,7 +22,10 @@ const redisObject = {
       return true;
     } catch (e) {
       console.log("set redis object error", e);
-      return false;
+      throw {
+        statusCode: StatusCode.ServerErrorInternal,
+        message: "internal server error",
+      };
     }
   },
   async delete(key: string, value: string) {
@@ -27,7 +34,10 @@ const redisObject = {
       return true;
     } catch (e) {
       console.log("delete redis object error", e);
-      return false;
+      throw {
+        statusCode: StatusCode.ServerErrorInternal,
+        message: "internal server error",
+      };
     }
   },
 };
