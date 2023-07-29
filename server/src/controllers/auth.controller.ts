@@ -59,12 +59,12 @@ class AuthController implements authControllerInterface {
       const userToken = await createToken({ email });
       const userRefreshToken = await createToken({ email }, true);
 
-      const userRedis = JSON.stringify({
+      const userData = {
         token: userToken,
         refreshToken: userRefreshToken,
-      });
+      };
 
-      await redisClient.set(email, userRedis);
+      await redisObject.set(email, userData);
 
       res.status(200).send({
         success: true,
