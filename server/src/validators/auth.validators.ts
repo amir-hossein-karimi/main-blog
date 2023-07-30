@@ -35,6 +35,16 @@ class AuthValidators {
         .withMessage("email format is wrong"),
     ];
   }
+
+  static refreshToken() {
+    return [
+      body("refreshToken")
+        .notEmpty()
+        .withMessage("refresh token is required")
+        .isJWT()
+        .withMessage("token is invalid"),
+    ];
+  }
 }
 
 export default AuthValidators;

@@ -91,13 +91,6 @@ class AuthController implements authControllerInterface {
     }
   }
 
-  register(req: Request, res: Response, next: NextFunction) {
-    try {
-    } catch (error) {
-      next(error);
-    }
-  }
-
   refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
       res.send("this is refresh token");
