@@ -6,6 +6,10 @@ import getRandomInt from "../utils/randomNumber";
 import StatusCode from "status-code-enum";
 import { createToken } from "../utils/jwt";
 import redisObject from "../utils/redisObject";
+import User from "../model/user.model";
+import { ROLES } from "../constants";
+
+const user = new User();
 
 class AuthController implements authControllerInterface {
   async getCode(req: Request, res: Response, next: NextFunction) {
@@ -39,6 +43,12 @@ class AuthController implements authControllerInterface {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { code, email } = req.body;
+
+      const hasUser = await user.getOne({ email });
+
+      if (!hasUser) {
+        await user.create({ email, role: ROLES.USER });
+      }
 
       const savedCode = await redisClient.get(`${email}:otp`);
 
@@ -83,7 +93,6 @@ class AuthController implements authControllerInterface {
 
   register(req: Request, res: Response, next: NextFunction) {
     try {
-      res.send("this is register");
     } catch (error) {
       next(error);
     }
