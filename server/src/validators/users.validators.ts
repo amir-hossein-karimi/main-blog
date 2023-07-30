@@ -40,7 +40,6 @@ class UserValidator {
         .isEmail()
         .withMessage("email is not valid")
         .custom(async (value) => await this.#emailValidation(value)),
-      body("password").notEmpty().withMessage("password is required"),
       body("role").custom(this.#roleValidation),
     ];
   }
@@ -52,7 +51,6 @@ class UserValidator {
         .withMessage("users is required")
         .isArray()
         .withMessage("enter a array"),
-      body("users.*.password").notEmpty().withMessage("password is required"),
       body("users.*.role").custom(this.#roleValidation),
     ];
   }
@@ -65,7 +63,6 @@ class UserValidator {
         .isEmail()
         .withMessage("invalid email")
         .custom(async (value) => await this.#emailValidation(value, true)),
-      body("password"),
       body("role").custom(this.#roleValidation),
     ];
   }

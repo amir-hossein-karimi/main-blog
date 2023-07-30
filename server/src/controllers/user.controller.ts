@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import User from "../model/user.model";
 import StatusCode from "status-code-enum";
-import { hashString } from "../utils/bcrypt";
 import { ROLES } from "../constants";
-import hashBulkUserPassword from "../utils/bulkHashPassword";
 import { userControllerIntefrace } from "../types/controller/user.types";
 import { oneUserInterface } from "../types/model/user.types";
 
@@ -12,7 +10,7 @@ const userInstance = new User();
 class UserController implements userControllerIntefrace {
   async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const users = await userInstance.getAll({}, { __v: 0, password: 0 });
+      const users = await userInstance.getAll({}, { __v: 0 });
 
       res.send({
         success: true,
@@ -30,7 +28,6 @@ class UserController implements userControllerIntefrace {
         { _id: req.params.id },
         {
           __v: 0,
-          password: 0,
         }
       );
 
@@ -55,12 +52,9 @@ class UserController implements userControllerIntefrace {
           statusCode: StatusCode.ClientErrorConflict,
         };
 
-      const hashedPassword = await hashString(body.password);
-
       const createRes = await userInstance.create({
         role: ROLES.USER,
         ...body,
-        password: hashedPassword,
       });
 
       res.send({
@@ -111,9 +105,7 @@ class UserController implements userControllerIntefrace {
         });
       }
 
-      const newUsers: any = await hashBulkUserPassword(uniqueUsers);
-
-      const createRes = await userInstance.bulkCreate(newUsers);
+      const createRes = await userInstance.bulkCreate(uniqueUsers);
 
       const existEmails = users.map((item) => item.email);
       res.send({
@@ -147,16 +139,10 @@ class UserController implements userControllerIntefrace {
         };
       }
 
-      let password;
-      if ("password" in body) {
-        password = await hashString(body.password);
-      }
-
       const updateRes = await userInstance.update(
         { _id: req.params.id },
         {
           ...body,
-          ...(password ? { password } : {}),
         }
       );
 

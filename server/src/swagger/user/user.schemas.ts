@@ -133,9 +133,6 @@
  *                  email:
  *                      type: string
  *                      description: enter new email for user
- *                  password:
- *                      type: string
- *                      description: enter new password for user
  *                  role:
  *                      type: string
  *                      enum:
@@ -151,14 +148,10 @@
  *                          type: object
  *                          required:
  *                              -   email
- *                              -   password
  *                          properties:
  *                              email:
  *                                  type: string
  *                                  description: enter user email
- *                              password:
- *                                  type: string
- *                                  description: enter a password
  *                              role:
  *                                  type: string
  *                                  enum:
@@ -169,14 +162,10 @@
  *              type: object
  *              required:
  *                  -   email
- *                  -   password
  *              properties:
  *                  email:
  *                      type: string
  *                      description: enter user email
- *                  password:
- *                      type: string
- *                      description: enter a password
  *                  role:
  *                      type: string
  *                      enum:

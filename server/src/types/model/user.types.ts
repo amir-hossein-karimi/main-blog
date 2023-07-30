@@ -2,10 +2,6 @@ import { successMessage } from "../global";
 
 interface oneUserInterface {
   email?: string;
-  password?: string;
-  token?: string;
-  refreshToken?: string;
-  code?: number;
   role?: string;
 }
 
