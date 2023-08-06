@@ -27,6 +27,21 @@
 /**
  * @swagger
  *  definitions:
+ *      logoutResponse:
+ *          type: object
+ *          properties:
+ *              success:
+ *                  type: boolean
+ *                  example: true
+ *              statusCode:
+ *                  type: integer
+ *                  example: 204
+ *              data:
+ *                  type: object
+ *                  properties:
+ *                      message:
+ *                          type: string
+ *                          example: "logout successfully"
  *      loginResponse:
  *          type: object
  *          properties:
